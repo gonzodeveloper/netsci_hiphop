@@ -13,7 +13,7 @@
 library(igraph)
 library(poweRlaw)
 setwd("~/repo/netsci_hiphop/")
-source('utilities.R')
+source('sctipts/utilities.R')
 
 # Load hip-hop artist-release edge list, make graph 
 df <- read.csv("data/hip_hop_groups_release.csv")
@@ -263,34 +263,58 @@ HH.dislnorm <- initialize_dislnorm(HH.artists.degs)
 HH.displ <- initialize_displ(HH.artists.degs)
 HH.dispois <- initialize_dispois(HH.artists.degs)
 
+TC.disexp <- initialize_disexp(TC.artists.degs)
+TC.dislnorm <- initialize_dislnorm(TC.artists.degs)
+TC.displ <- initialize_displ(TC.artists.degs)
+TC.dispois <- initialize_dispois(TC.artists.degs)
+
+
 
 # We can see that neither of the networks' degree distributions are particularly well 
 # modeled by Poisson, Exponential, Log Normal or Power Law Models
 new_window()
 plot_discrete_distributions("Hip Hop Distribution Comparison", HH.disexp, HH.dislnorm, HH.displ, HH.dispois)
 new_window()
-plot_discrete_distributions("Teechno Distribution Comparison", HH.disexp, HH.dislnorm, HH.displ, HH.dispois)
+plot_discrete_distributions("Teechno Distribution Comparison", TC.disexp, TC.dislnorm, TC.displ, TC.dispois)
+
+
+(HH.dislnorm$setXmin(HH.displ$getXmin()))
+HH.dislnorm$setPars(estimate_pars(HH.dislnorm)) 
+HH.pl.vs.lnorm <- compare_distributions(HH.dislnorm, HH.displ)
+HH.pl.vs.lnorm$p_two_sided          # 0.000498521
+HH.pl.vs.lnorm$p_one_sided          # 0.0002492605
+HH.pl.vs.lnorm$test_statistic       # 3.48155
+
+
+(TC.dislnorm$setXmin(TC.displ$getXmin()))
+TC.dislnorm$setPars(estimate_pars(TC.dislnorm)) 
+TC.pl.vs.lnorm <- compare_distributions(TC.dislnorm, TC.displ)
+TC.pl.vs.lnorm$p_two_sided          # 0.278343
+TC.pl.vs.lnorm$p_one_sided          # 0.1391715
+TC.pl.vs.lnorm$test_statistic       # 1.084049
+
 
 #############################################################################
 # MODELING WITH POWER LAW AND BARABASI ALBERT
 #############################################################################
-new_window("Hip Hop", 12, 4)
-par(mfrow=c(1,2))
+new_window("Hip Hop", 6, 8)
+par(mfrow=c(2,1))
 plot_distribution_pl(HH.artists, title = "Hip Hop", geodesic = TRUE)
 
-
+# No good...
 new_window("Hip Hop Preferential Attachment", 12, 4)
-par(mfrow=c(1,2))
-HH.sample_pa <- sample_pa_age(vcount(HH.artists), directed=FALSE, pa.exp=0.8, m=1)
+par(mfrow=c(2,1))
+HH.sample_pa <- sample_pa(vcount(HH.artists), directed=FALSE, 
+                              pa.exp=0.2, m=1, zero.appeal = 5)
 plot_distribution_pl(HH.sample_pa, title = "Hip Hop Preferential Attachment", geodesic = TRUE)
 
 
 # Tring again for techno
-new_window("Techno", 12, 4)
-par(mfrow=c(1,2))
+new_window("Techno", 6, 8)
+par(mfrow=c(2,1))
 plot_distribution_pl(TC.artists, title = "Techno", geodesic = TRUE)
 
-
+# Also no good
 new_window("Techno Preferential Attachment", 12, 4)
 par(mfrow=c(1,2))
 HH.sample_pa <- sample_pa_age(vcount(TC.artists), directed=FALSE, pa.exp=2, m=1, aging.exp=-2)
@@ -330,22 +354,22 @@ V(TC.artists)$Cluster_Infomap <- membership(TC.info)
 # Robustness
 new_window(width=8,height=4)
 par(mfrow=c(1, 2))
-HH.failure.metrics <- robustness_simulation(HH.artists,  attack = TRUE, cutoff = .9)
+HH.failure.metrics <- robustness_simulation(HH.artists,  attack = FALSE, cutoff = .9)
 plot_robustness_results(HH.failure.metrics, "Attack on Hip Hop")
 
-HH.giant.failure.metrics <- robustness_simulation(HH.giant, attack = TRUE, cutoff = .9)
-plot_robustness_results(HH.giant.failure.metrics, "Attack on Hip Hop Main")
 
 new_window(width=8,height=4)
 par(mfrow=c(1, 2))
 TC.failure.metrics <- robustness_simulation(TC.artists,  attack = TRUE, cutoff = .9)
 plot_robustness_results(TC.failure.metrics, "Attack on Techno")
 
-TC.giant.failure.metrics <- robustness_simulation(TC.giant, attack = TRUE, cutoff = .9)
-plot_robustness_results(TC.giant.failure.metrics, "Attack on Techno Main")
-
 # SIR (SI)
-HH.sir <- sir(HH.artists, beta=0.2, gamma = 0, no.sim = 5)
+HH.sir <- sir(HH.artists, beta= 0.25, gamma = 0, no.sim = 50)
+plot(HH.sir, main = "Hip Hop SI Model")
+
+TC.sir <- sir(TC.artists, beta= 0.25, gamma = 0, no.sim = 50)
+plot(TC.sir, main = "Techno SI Model")
+
 # Summarize and save hip hop
 summary(HH.artists)
 write_graph(HH.artists, "graphs/hip_hop_artists.graphml",
