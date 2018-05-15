@@ -50,4 +50,39 @@ It is immediately obvious that the techno artists’ network gives us a far more
 |Cluster global	|0.6366	|0.5245	|
 |Assortivity	|0.2150	|0.3402	|
 
+The difference in clustering coefficients (i.e. transitivity) in these graphs is perhaps most notable of all the basic metrics. That the rappers have a higher global coefficient is explained by their tendency to work with artists across the spectrum, with many even recording  joint productions along side non-hip-hop names. This is a necessity for any artist hoping to broaden their appeal and grow their fan-base. It is surprising though, that the techno artists have a higher local figure. With the background discussion, our initial assumptions would have us predict that because rappers tend to work in groups they would have higher local transitivity. It seems though that there is enough collaboration with unconventional and unknown artists1 in the hip hop graph that the local clustering coefficient is brought down. This in turn suggests that the hip hop network is quite open and susceptible to new ideas.  
+
+Finally, as one would expect with any real social network. Both of these graphs do fit firmly into the small world regime.
+
+![](https://raw.githubusercontent.com/gonzodeveloper/netsci_hiphop/master/imgs/techno.png)
+*Image 2: Techno Network - expanded with Open Ord, colored by modularity class, sized by pagerank, filtered for giant component
+
+### Centrality
+
+Since this study is written with the goal of examining the global structures of our networks we will not dedicate took much space to comparing the centrality metrics of individual artists in either graph. That the highest ranked artists by various centrality measures—such as degree, pagerank, betweeness and closeness--are indeed popular artists is unremarkable, unless the reader didn’t trust the efficacy of traditional centrality metrics. 
+
+However, with one measure in particular, eigen centrality, we did have an interesting result. The top ten artists as scored by this metric were exactly the top ten members of the hip hop group Wu Tang Clan. Because we can simplify our understanding of eigen centrality to mean that nodes will gain higher rank when connected to other nodes with high rank, it is safe to conclude that in such a large graph, populated with many other such group ensembles, Wu Tang is particularly notable for its’ members work with a spectacularly broad range of other artists.
+
+To examine some of the other prominent artists we did construct their ego networks, though due to their size, it would be far more informative for the reader to explore their nodes in the full gephi visualization.
+
+### Cascading Ideas and Failures
+
+We can use the existing Susceptible-Infected (SI) model to explore how fast ideas might spread in both of these networks. For the model I chose the somewhat arbitrary beta—infection rate—to be 0.25, then ran 50 simulations on each graph to get the results. 
+
+![](https://raw.githubusercontent.com/gonzodeveloper/netsci_hiphop/master/imgs/hip_hip_si.png)
+
+![](https://raw.githubusercontent.com/gonzodeveloper/netsci_hiphop/master/imgs/techno_si.png)
+
+As predicted earlier, it is clear that ideas (or infections) spread much faster through the hip hop network. This is largely to to the high number of prominent artists with links spreading across the graph. Moreover, we can see the reflection of this in reality with the speed and pervasiveness of trends in rap music—DJ-808 drum machines, Auto-Tune, Mumble Rap, etc. 
+
+Furthermore, we can measure the robustness of these networks with a “targeted attack” simulation. Although, not a realistic scenario, we can test the robustness of the networks by removing high degree nodes in descending order and observe how the size of the giant component shrinks.
+
+![](https://raw.githubusercontent.com/gonzodeveloper/netsci_hiphop/master/imgs/hip_hop_attack.png)
+
+![](https://raw.githubusercontent.com/gonzodeveloper/netsci_hiphop/master/imgs/techno_attack.png)
+
+The hip hop network shows amazing resilience to the attack. In fact, the decay of the giant component is not even particularly faster than if the attack were to be randomized1. On the other hand, the decay of the giant component when under attack in the techno graph reflects a that of a more typical scale-free network which relies on hubs to hold together its structure.
+
+
+
 
