@@ -83,6 +83,36 @@ Furthermore, we can measure the robustness of these networks with a “targeted 
 
 The hip hop network shows amazing resilience to the attack. In fact, the decay of the giant component is not even particularly faster than if the attack were to be randomized1. On the other hand, the decay of the giant component when under attack in the techno graph reflects a that of a more typical scale-free network which relies on hubs to hold together its structure.
 
+### Modeling
 
+It just so happens that the degree distributions for both of these networks does do not quite lend themselves to Barabasi’s preferential attachment model. After a solid couple nights of fiddling with the various parameters the impossibility of properly fitting the models’ geodesic distances, gamma values, and transitivity figures to the original degree distribution. This motivated the a somewhat more simplistic approach. 
 
+With both of these networks we see the existence of hubs along side a relatively low degree cutoff. This suggested the possibility of a stretched exponential or log -normal degree distribution. 
 
+![](https://raw.githubusercontent.com/gonzodeveloper/netsci_hiphop/master/imgs/hip_hop_degdist.png)
+
+![](https://raw.githubusercontent.com/gonzodeveloper/netsci_hiphop/master/imgs/techno_degdist.png)
+
+Informed by these plots we ran distribution comparison metrics on each, measuring fit of the log normal vs. the power law distribution. For both, though especially for the hip hop network, the test statistics strongly suggested that a log normal was a better fit.
+
+Considering the fact there is indeed an upper limit of how many artists can collaborate on a single release, and the reality that no artist, electronic or rapper can reasonably work with thousands of others over their career---as a fat tailed distribution might suggest—the stretched exponential does seem a sensible fit.
+
+Unfortunately this leaves us without a model to explain other more pertinent graph metrics such as transitivity, distance, and assortitvity, so we will leave further discussion to the following sections.
+
+### Discussion
+
+The metrics gathered on these graphs, particularly those relating to the hip hop network, do lead us to several conclusions, some more obvious than others.
+
+In contrasting the two genres we did learn that each possesses a unique network structure. The differences in these structures can in turn be explained by the differences in the domains from which the emerged. Additionally, by exploring the background of each of the genres we were able to accurately predict certain graph metrics such as transitivity, average path length, and robustness. 
+
+The use of the SI model to show the potential spread of ideas within these genres did give us a for more novel insight. The model showed the high susceptibility of the hip hop network to new ideas, thereby confirming a somewhat long-shot assumption given earlier in the paper. 
+
+### Further Study
+
+he real success of this project is actually the construction of these networks so that they can be loaded and analyzed more in the future. There are many questions that still remain of which the author lacked the time and initiative to follow up on.
+
+First and foremost, in the original proposal of this paper, we asked whether or not hip hop artists were more likely to collaborate based on region, age, or established success. These are all measures of assortitvity that only await the addition of the appropriate attributes for these graphs. However, because of the Discogs dataset did not include any of this information for their releases, such attributes would either have to be added manually or parsed from another database. 
+
+As mentioned in the last section, we also need to find a better model that could cover all of the various metrics of our networks in question. Perhaps the preferential attachment model could serve this purpose if more time was given to finding the correct parameterization, yet it seems more likely that the answer lies in the employment of exponential random graph models (ERGMs). 
+
+Finally, additional curation of the graphs themselves may be necessary. While the author did take the time to remove duplicates, merge aliases, and split up groups, because much of this was accomplished by hand, there likely still exist some minor inconsistencies in the data.
