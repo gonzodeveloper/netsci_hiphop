@@ -12,6 +12,7 @@
 #############################################################################
 library(igraph)
 library(poweRlaw)
+library(linkcomm)
 setwd("~/repo/netsci_hiphop/")
 source('sctipts/utilities.R')
 
@@ -24,6 +25,9 @@ V(HH)$type <- bipartite_mapping(HH)$type
 HH.proj <- bipartite_projection(HH)
 HH.artists <- HH.proj$proj1
 
+# Add label attribute, remove name (otherwise reify link comm will fail)
+V(HH.artists)$label <-V(HH.artists)$name
+HH.artists <- delete_vertex_attr(HH.artists, "name")
 
 # Summarize and save
 summary(HH.artists)
@@ -55,12 +59,14 @@ V(TC)$type <- bipartite_mapping(TC)$type
 TC.proj <- bipartite_projection(TC)
 TC.artists <- TC.proj$proj1
 
+# Add label attribute, remove name (otherwise reify link comm will fail)
+V(TC.artists)$label <-V(TC.artists)$name
+TC.artists <- delete_vertex_attr(TC.artists, "name")
+
 # Summary and Save (notice that this single removal subtracted 22,986 edges from the projection)
 summary(TC.artists)
 write_graph(HH.artists, "graphs/techno_artists_fixed.graphml",
             format = "graphml")
-
-
 
 #############################################################################
 # RUNNING SIMPLE METRICS TO COMPARE EACH GRAPH
@@ -147,32 +153,32 @@ V(TC.artists)$betweenness <- betweenness(TC.artists, normalized=TRUE)
 V(TC.artists)$closeness <- closeness(TC.artists, normalized=TRUE)
 
 # Print results for each
-V(HH.artists)[order(V(HH.artists)$degree, decreasing=TRUE)[1:10]]$name
+V(HH.artists)[order(V(HH.artists)$degree, decreasing=TRUE)[1:10]]$label
 #[1] "Snoop Dogg"        "Lil Wayne"         "Jay-Z"            
 #[4] "Busta Rhymes"      "Pharrell Williams" "Kanye West"       
 #[7] "Nas"               "50 Cent"           "Akon"             
 #[10] "Lil' Jon" 
-V(HH.artists)[order(V(HH.artists)$strength, decreasing=TRUE)[1:10]]$name
+V(HH.artists)[order(V(HH.artists)$strength, decreasing=TRUE)[1:10]]$label
 #[1] "Snoop Dogg"       "Lil Wayne"        "50 Cent"         
 #[4] "Method Man"       "RZA"              "Ghostface Killah"
 #[7] "Jay-Z"            "GZA"              "Lil' Jon"        
 #[10] "Raekwon" 
-topnv(HH.artists, V(HH.artists)$eigen_centrality)$name
+topnv(HH.artists, V(HH.artists)$eigen_centrality)$label
 #[1] "Ghostface Killah"  "Raekwon"           "Method Man"       
 #[4] "RZA"               "Inspectah Deck"    "GZA"              
 #[7] "Ol' Dirty Bastard" "Wu-Tang Clan"      "Masta Killa"      
 #[10] "U-God" 
-topnv(HH.artists, V(HH.artists)$page_rank)$name
+topnv(HH.artists, V(HH.artists)$page_rank)$label
 #[1] "Snoop Dogg"        "Lil Wayne"         "Jay-Z"            
 #[4] "Lil' Jon"          "50 Cent"           "Pharrell Williams"
 #[7] "Busta Rhymes"      "Kanye West"        "Method Man"       
 #[10] "Nas"  
-topnv(HH.artists, V(HH.artists)$betweenness)$name
+topnv(HH.artists, V(HH.artists)$betweenness)$label
 #[1] "Snoop Dogg"        "Jay-Z"             "Nas"              
 #[4] "Busta Rhymes"      "KRS-One"           "Lil Wayne"        
 #[7] "Pharrell Williams" "Kanye West"        "Eminem"           
 #[10] "Mos Def"
-topnv(HH.artists, V(HH.artists)$closeness)$name
+topnv(HH.artists, V(HH.artists)$closeness)$label
 #[1] "Snoop Dogg"        "Pharrell Williams" "Busta Rhymes"     
 #[4] "Nas"               "T.I."              "50 Cent"          
 #[7] "Lil Wayne"         "Kanye West"        "Ludacris"         
@@ -180,62 +186,111 @@ topnv(HH.artists, V(HH.artists)$closeness)$name
 
 
 
-V(TC.artists)[order(V(TC.artists)$degree, decreasing=TRUE)[1:10]]$name
+V(TC.artists)[order(V(TC.artists)$degree, decreasing=TRUE)[1:10]]$label
 #[1] "Adam Beyer"           "D.A.V.E. The Drummer"
 #[3] "Cari Lekebusch"       "Mark Broom"          
 #[5] "Jack Wax"             "Ant"                 
 #[7] "Sterling Moss"        "Ben Sims"            
 #[9] "Guy McAffer"          "Chris Liberator" 
-V(TC.artists)[order(V(TC.artists)$strength, decreasing=TRUE)[1:10]]$name
+V(TC.artists)[order(V(TC.artists)$strength, decreasing=TRUE)[1:10]]$label
 #[1] "Adam Beyer"           "Mark Broom"          
 #[3] "D.A.V.E. The Drummer" "Sterling Moss"       
 #[5] "Jack Wax"             "Ant"                 
 #[7] "Ben Sims"             "Cari Lekebusch"      
 #[9] "Benji303"             "Chris Liberator"  
-topnv(TC.artists, V(TC.artists)$eigen_centrality)$name
+topnv(TC.artists, V(TC.artists)$eigen_centrality)$label
 #[1] "Adam Beyer"     "Cari Lekebusch" "Patrice Scott" 
 #[4] "Muslimgauze"    "C_C"            "Genghis (2)"   
 #[7] "Andy Vaz"       "Metek"          "Underspreche"  
 #[10] "powwowW" 
-topnv(TC.artists, V(TC.artists)$page_rank)$name
+topnv(TC.artists, V(TC.artists)$page_rank)$label
 #[1] "Mark Broom"           "D.A.V.E. The Drummer"
 #[3] "Adam Beyer"           "Ben Sims"            
 #[5] "Ant"                  "Guy McAffer"         
 #[7] "Sterling Moss"        "Alex Calver"         
 #[9] "Gary Beck"            "Jack Wax" 
-topnv(TC.artists, V(TC.artists)$betweenness)$name
+topnv(TC.artists, V(TC.artists)$betweenness)$label
 #[1] "Mark Broom"           "D.A.V.E. The Drummer"
 #[3] "Pounding Grooves"     "Ben Sims"            
 #[5] "Ant"                  "DJ Ogi"              
 #[7] "Green Velvet"         "Adam Beyer"          
 #[9] "Mr. G"                "Bad Boy Pete"  
-topnv(TC.artists, V(TC.artists)$closeness)$name
+topnv(TC.artists, V(TC.artists)$closeness)$label
 #[1] "Mark Broom"           "Ben Sims"            
 #[3] "Pounding Grooves"     "D.A.V.E. The Drummer"
 #[5] "Mr. G"                "Markus Suckut"       
 #[7] "Chris Liebing"        "Edit Select"         
 #[9] "Davide Squillace"     "Terry Brookes" 
 
+# We will refer to these 5 as the Artists of Interest (AoI) for reasons explained later
+# they will be used again in the overlapping community section
+
 
 # Ego Networks for Hip Hop Only
-(snoop <- V(HH.artists)[which(V(HH.artists)$name=="Snoop Dogg")])
-(nas <- V(HH.artists)[which(V(HH.artists)$name=="Nas")])
-(lil_jon <- V(HH.artists)[which(V(HH.artists)$name=="Lil' Jon")])
-(ghostface <- V(HH.artists)[which(V(HH.artists)$name=="Ghostface Killah")])
-(pharell <- V(HH.artists)[which(V(HH.artists)$name=="Pharrell Williams")])
+(snoop <- V(HH.artists)[which(V(HH.artists)$label=="Snoop Dogg")])
+(nas <- V(HH.artists)[which(V(HH.artists)$label=="Nas")])
+(lil_jon <- V(HH.artists)[which(V(HH.artists)$label=="Lil' Jon")])
+(ghostface <- V(HH.artists)[which(V(HH.artists)$label=="Ghostface Killah")])
+(pharell <- V(HH.artists)[which(V(HH.artists)$label=="Pharrell Williams")])
+
+AoI <- c(snoop, nas, lil_jon, ghostface, pharell)
+
+HH.snoop <- make_and_plot_ego_graph(HH.artists, snoop, 1)
+HH.nas <- make_and_plot_ego_graph(HH.artists, nas, 1)
+HH.lil_jon <- make_and_plot_ego_graph(HH.artists, lil_jon, 1)
+HH.ghostface <- make_and_plot_ego_graph(HH.artists, ghostface, 1)
+HH.pharell <- make_and_plot_ego_graph(HH.artists, pharell, 1)
 
 
-HH.snoop <- make_and_plot_ego_graph(HH.artists, snoop, 3)
-HH.nas <- make_and_plot_ego_graph(HH.artists, nas, 3)
-HH.lil_jon <- make_and_plot_ego_graph(HH.artists, lil_jon, 3)
-HH.ghostface <- make_and_plot_ego_graph(HH.artists, ghostface, 3)
-HH.pharell <- make_and_plot_ego_graph(HH.artists, pharell, 3)
+# Average Transitvities
+transitivity(HH.artists, type = "localaverage") # 0.6365912
+transitivity(HH.snoop, type = "localaverage") # 0.7571265
+transitivity(HH.nas, type = "localaverage") # 0.8160505
+transitivity(HH.lil_jon, type = "localaverage") # 0.7595058
+transitivity(HH.ghostface, type = "localaverage") # 0.8791565
+transitivity(HH.pharell, type = "localaverage") # 0.7987071
+
+assortativity.degree(HH.artists, directed = FALSE) # [1] 0.2149805
+assortativity.degree(HH.snoop, directed = FALSE)   # [1] -0.2429614
+assortativity.degree(HH.nas, directed = FALSE)     # [1] -0.2994587
+assortativity.degree(HH.lil_jon, directed = FALSE) # [1] -0.3484328
+assortativity.degree(HH.ghostface, directed = FALSE) # [1] -0.2488484
+assortativity.degree(HH.pharell, directed = FALSE) # [1] -0.2524449
+
+
+
+HH.snoop.mc <- max_cliques(HH.snoop)
+table(sapply(HH.snoop.mc, length))
+# 2  3  4  5  6  7 13 
+#16 55 48 14  4  2  1 
+
+HH.nas.mc <- max_cliques(HH.nas)
+table(sapply(HH.nas.mc, length))
+# 2  3  4  5  6 12 
+#11 23 14  1  2  1 
+
+HH.lil_jon.mc <- max_cliques(HH.lil_jon)
+table(sapply(HH.lil_jon.mc, length))
+# 2  3  4  5  6  7  8 
+#3 25  6  3  6  7  2 
+
+HH.ghostface.mc <- max_cliques(HH.ghostface)
+table(sapply(HH.ghostface.mc, length))
+# 2  3  4  7 11 12 
+#5  3  2  1  6  4 
+
+HH.pharell.mc <- max_cliques(HH.pharell)
+table(sapply(HH.pharell.mc, length))
+# 2  3  4  5  6  7 13 
+#3 20 27 10  2  1  1 
 
 write_graph(HH.snoop, "graphs/snoop.graphml", format = "graphml")
 write_graph(HH.nas, "graphs/nas.graphml", format = "graphml")
 write_graph(HH.lil_jon, "graphs/lil_jon.graphml", format = "graphml")
 write_graph(HH.ghostface, "graphs/ghostface.graphml", format = "graphml")
 write_graph(HH.pharell, "graphs/pharell.graphml", format = "graphml")
+
+
 
 
 
@@ -322,19 +377,26 @@ plot_distribution_pl(TC.sample_pa, title = "Techno Preferential Attachment", geo
 
 
 #############################################################################
-# CLUSTERING
+# Communities
 #############################################################################
 # Hip Hop Cluster Louvain
 HH.cl <- cluster_louvain(HH.artists)
 modularity(HH.cl)                    # 0.8496378
 length(HH.cl)                        # 2538
+table(sizes(HH.cl))
+
 V(HH.artists)$Cluster_Louvain <- membership(HH.cl)
+assortativity_nominal(HH.artists, 
+                      V(HH.artists)$Cluster_Louvain) # 0.867822
 
 # Hip Hop Cluster Infomap
 HH.info <- cluster_infomap(HH.artists)
 modularity(HH.info)                  # 0.785544
 length(HH.info)                      # 2895
 V(HH.artists)$Cluster_Infomap <- membership(HH.info)
+
+assortativity_nominal(HH.artists, 
+                      V(HH.artists)$Cluster_Infomap) # 0.7725591
 
 # Techno Cluster Louvain
 TC.cl <- cluster_louvain(TC.artists)
@@ -347,6 +409,113 @@ modularity(TC.info)                 # 0.9312459
 length(TC.info)                     # 2060
 V(TC.artists)$Cluster_Infomap <- membership(TC.info)
 
+
+# Overlapping communities
+HH.edges <- as_edgelist(HH.artists)
+HH.lc <- getLinkCommunities(HH.edges, hcmethod = "average")
+
+HH.cw <- getCommunityCentrality(HH.lc, type = "commweight")
+top.cw <- head(sort(HH.cw, decreasing = TRUE), n = 10)
+V(HH.artists)[as.numeric(names(top.cw))]$label
+#[1] "DJ Khaled"       "Lil Wayne"       "Jay-Z"           "Rick Ross"      
+#[5] "Lil' Jon"        "Snoop Dogg"      "Mase"            "Quavo"          
+#[9] "Chris Brown (4)" "RZA"    
+
+HH.comcon <- getCommunityConnectedness(HH.lc, conn = "conn")
+(top.com <- head(sort(HH.comcon, decreasing=TRUE)))
+#795     1063     1298     1147     1062     1126 
+#64.44258 50.20314 49.29036 46.00433 40.34507 39.97996 
+
+V(HH.artists)[as.numeric(getNodesIn(HH.lc, clusterids = 795))]$label
+#[1] "GZA"               "RZA"               "Inspectah Deck"    "Method Man"       
+#[5] "Nas"               "J-Love"            "Raekwon"           "Ghostface Killah" 
+#[9] "Wu-Tang Clan"      "Ol' Dirty Bastard" "U-God"             "Masta Killa"      
+V(HH.artists)[as.numeric(getNodesIn(HH.lc, clusterids = 1063))]$label
+#[1] "Mary J. Blige"      "Snoop Dogg"         "Bobby Brown"        "Charlie Wilson"    
+#[5] "Kardinal Offishall" "Damian Marley"      "Colby O'Donis"      "DJ Vadim"          
+#[9] "The Electric"       "Yarah Bravo"        "Shaggy"             "Sway"              
+#[13] "Maxi Priest"        "Two Fingers"       
+V(HH.artists)[as.numeric(getNodesIn(HH.lc, clusterids = 1298))]$label
+#[1] "Usher"           "Lil Wayne"       "Rick Ross"       "Chris Brown (4)"
+#[5] "DJ Khaled"       "Young Jeezy"    
+
+V(HH.artists)[as.numeric(getNodesIn(HH.lc, clusterids = 1147))]$label
+#[1] "Q-Tip"                "A Tribe Called Quest" "Fugees"              
+#[4] "Busta Rhymes"         "John Forte"           "Lauryn Hill"         
+#[7] "Wyclef Jean"          "Pras Michel"          "Phife Dawg"          
+#[10] "Ali Shaheed Muhammad" "Jarobi White"         "Kelis"               
+
+V(HH.artists)[as.numeric(getNodesIn(HH.lc, clusterids = 1062))]$label
+#[1] "Mary J. Blige"      "Pharrell Williams"  "Bobby Brown"        "Charlie Wilson"    
+#[5] "Kardinal Offishall" "Damian Marley"      "Colby O'Donis"      "DJ Vadim"          
+#[9] "The Electric"       "Yarah Bravo"        "Shaggy"             "Sway"              
+#[13] "Maxi Priest"        "Two Fingers"       
+> 
+
+
+
+HH.comm <- reify_link_communities(HH.artists, HH.lc)
+summary(HH.comm)
+
+
+
+# Ego Networks for Hip Hop Only
+(snoop_c <- V(HH.comm)[label == "Snoop Dogg"])
+(nas_c <- V(HH.comm)[label == "Nas"])
+(lil_jon_c <- V(HH.comm)[label == "Lil' Jon"])
+(ghostface_c <- V(HH.comm)[label == "Ghostface Killah"])
+(pharell_c <- V(HH.comm)[label == "Pharrell Williams"])
+
+AoI_c <- c(snoop_c, nas_c, lil_jon_c, ghostface_c, pharell_c)
+
+for(v in AoI){
+  adj <- adjacent_vertices(HH.comm, v, mode = "all")[[1]]
+  sc <- adj[comm_p == TRUE]
+  print(degree(HH.comm, sc))
+}
+
+
+
+
+find_bridges <- function(g, v){
+  cnames <- c("vertex", "n1", "n1_adj","n2","n2_adj")
+  df <- data.frame(matrix(data = 0, nrow = 0, ncol = 5))
+  colnames(df) <- cnames
+  adj <- adjacent_vertices(g, v, mode = "all")[[1]][comm_p == FALSE]
+  print(v)
+  if(length(adj) > 1){
+    pairs <- combn(adj, m = 2)
+    
+    for(i in 1:(length(pairs)/2)){
+      n1 <- V(g)[pairs[1,i]]
+      n2 <- V(g)[pairs[2,i]]
+      n1.comms <- adjacent_vertices(g, n1, mode = "all")[[1]][comm_p == TRUE]
+      n2.comms <- adjacent_vertices(g, n2, mode = "all")[[1]][comm_p == TRUE]
+      mutual.comms <- intersection(n1.comms, n2.comms)
+    
+      if(length(mutual.comms) == 0 & length(n1.comms) > 0 & length(n2.comms) > 0){
+        n1.adj <- length(adjacent_vertices(g, n1, mode = "all")[[1]][comm_p == FALSE])
+        n2.adj <- length(adjacent_vertices(g, n2, mode = "all")[[1]][comm_p == FALSE])
+      
+        de <- data.frame(list(v$label, n1$label, n1.adj, n2$label, n2.adj))
+        colnames(de) <- cnames
+        df <- rbind(df, de)
+      }
+    }
+  }
+  return(df)
+}
+
+
+
+
+biggest_lc <- function(g, l_comms){
+  sizes <- c()
+  for(lc in l_comms){
+    sizes <- c(sizes, length(adjacent_vertices(g, lc, mode = "all")[[1]]))
+  }
+  return(max(sizes))
+}
 #############################################################################
 # ROBUSTNESS AND CASCADES
 #############################################################################
